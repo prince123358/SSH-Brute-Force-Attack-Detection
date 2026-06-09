@@ -1,0 +1,7 @@
+index="linux_log" sourcetype="linux_secure_log"
+("Failed password" OR "Accepted password")
+| eval action=if(searchmatch("Failed password"),"Failed","Success")
+| stats count(eval(action="Failed")) as Failed_Attempts
+       count(eval(action="Success")) as Successful_Logins
+       by src_ip
+| where Failed_Attempts>=5 AND Successful_Logins>=1

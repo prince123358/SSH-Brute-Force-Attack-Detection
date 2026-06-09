@@ -1,0 +1,22 @@
+#TOP Attacker IPs:
+
+index="linux_log" sourcetype="linux_secure_log" "Failed password"
+| stats count as Failed_Attempts by src_ip
+| sort - Failed_Attempts
+| head 10
+
+#Failed SSH Login Trend
+
+index="linux_log" sourcetype="linux_secure_log" "Failed password"
+| timechart span=1h count
+
+
+#Brute Force Success and Failed
+
+index="linux_log" sourcetype="linux_secure_log"
+("Failed password" OR "Accepted password")
+| eval action=if(searchmatch("Failed password"),"Failed","Success")
+| stats count(eval(action="Failed")) as Failed_Attempts
+       count(eval(action="Success")) as Successful_Logins
+       by src_ip
+| where Failed_Attempts>=5 AND Successful_Logins>=1
